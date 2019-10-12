@@ -4,7 +4,6 @@ import time
 import json
 
 from datetime import timedelta
-from timeloop import Timeloop
 from datetime import datetime
 from PIL import ImageFont, Image
 from helpers import get_device
@@ -112,6 +111,14 @@ def renderDepartureStation(departureStation, xOffset):
         draw.text((int(xOffset), 0), text=text, font=fontBold, fill="yellow")
 
     return draw
+
+
+def isWithinOperationHours(operationHours):
+    now = datetime.now()
+    if now.hour >= operationHours["start"] and now.hour <= operationHours["end"]:
+        return True
+
+    return False
 
 
 def renderDots(draw, width, height):
@@ -237,9 +244,11 @@ try:
     loop_count = 0
 
     data = loadData(config["transportApi"], config["journey"])
-    if data[0] == False:
+    stationName = data[2]
+
+    if data[0] == False or isWithinOperationHours(config["operationHours"]) == False:
         virtual = drawBlankSignage(
-            device, width=widgetWidth, height=widgetHeight, departureStation=data[2])
+            device, width=widgetWidth, height=widgetHeight, departureStation=stationName)
     else:
         virtual = drawSignage(device, width=widgetWidth,
                               height=widgetHeight, data=data)
@@ -248,14 +257,18 @@ try:
     timeNow = time.time()
 
     while True:
-        if(timeNow - timeAtStart >= config["refreshTime"]):
-            data = loadData(config["transportApi"], config["journey"])
-            if data[0] == False:
+        if timeNow - timeAtStart >= config["refreshTime"]:
+            if isWithinOperationHours(config["operationHours"]) == False:
                 virtual = drawBlankSignage(
-                    device, width=widgetWidth, height=widgetHeight, departureStation=data[2])
+                    device, width=widgetWidth, height=widgetHeight, departureStation=stationName)
             else:
-                virtual = drawSignage(device, width=widgetWidth,
-                                      height=widgetHeight, data=data)
+                data = loadData(config["transportApi"], config["journey"])
+                if data[0] == False:
+                    virtual = drawBlankSignage(
+                        device, width=widgetWidth, height=widgetHeight, departureStation=data[2])
+                else:
+                    virtual = drawSignage(device, width=widgetWidth,
+                                          height=widgetHeight, data=data)
 
             timeAtStart = time.time()
 
