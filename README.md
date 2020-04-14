@@ -1,7 +1,9 @@
 # UK Train Departure Display 
 
-A set of python scripts to display replica near real-time UK railway station departure data on SSD13xx style screens.
+A set of python scripts to display replica near real-time UK railway station departure data on SSD13xx style screens. 
 Uses the publicly available [Transport API](https://www.transportapi.com/).  
+
+NOW WITH BACKPORTED CHANGES! 
 
    * [Installation](#installation)
    * [Configuration](#configuration)
@@ -47,7 +49,8 @@ Copy `config.sample.json` to `config.json` and complete.
     "destinationStation": null,
     "stationAbbr": {
       "International": "Intl."
-    }
+    },
+    "outOfHoursName": "Hogwarts"
   },
   "refreshTime": 180,
   "transportApi": {
@@ -68,6 +71,8 @@ Copy `config.sample.json` to `config.json` and complete.
 `destinationStation` - the optional [short code](https://www.nationalrail.co.uk/stations_destinations/48541.aspx) for the destination station 
 
 `stationAbbr` - a list of words and their abbreviations that can be used to shorten station names, useful for small displays. 
+
+`outOfHoursName` - the station name to display when out of hours. 
 
 ### Transport API Settings
 
@@ -102,7 +107,8 @@ $ python ./src/main.py --display ssd1322 --width 256 --height 64 --interface spi
 
 ## Video demo
 
-Chris Hutchinson tweeted a video demo of the original software running on a real device: https://twitter.com/chrishutchinson/status/1136743837244768257 I will update this with a video of the modified version at some point in the future.
+Click here for a video demo of the display running in a 3D printed case.
+![](TrainDisplay.mov)
 
 ## Thanks
 
@@ -110,4 +116,4 @@ A big thanks to Chris Hutchinson who originally built this code! He can be found
 
 The fonts used were painstakingly put together by `DanielHartUK` and can be found on GitHub at https://github.com/DanielHartUK/Dot-Matrix-Typeface - A huge thanks for making that resource available!
 
-UPD
+This has been backported from the Balena version (https://github.com/balenalabs/uk-train-departure-display) that forked from this repo, I wanted to remove the deployment side of it / docker etc.

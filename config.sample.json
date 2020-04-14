@@ -4,7 +4,8 @@
     "destinationStation": null,
     "stationAbbr": {
       "International": "Intl."
-    }
+    },
+    "outOfHoursName": "Hogwarts"
   },
   "refreshTime": 180,
   "transportApi": {
