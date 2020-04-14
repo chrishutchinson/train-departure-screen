@@ -8,6 +8,7 @@ NOW WITH BACKPORTED CHANGES!
    * [Installation](#installation)
    * [Configuration](#configuration)
    * [Running](#running)
+   * [3D-Printed-Case](#3D-Printed-Case)
 
 ![](normal.gif)
 
@@ -109,6 +110,12 @@ $ python ./src/main.py --display ssd1322 --width 256 --height 64 --interface spi
 
 Click here for a video demo of the display running in a 3D printed case.
 https://youtu.be/rQiCBnV9Zi4
+
+## 3D-Printed-Case
+
+I have designed a 3D printed case in OpenSCAD, it should fit a SSD1322 module (specifically this one https://www.aliexpress.com/item/32921021149.html?spm=a2g0s.9042311.0.0.27424c4dnjcngM) and a standard Raspberry Pi Zero W.  The files can be found in the 3d-printed-case folder.
+
+![](train-display-open-scad.png)
 
 ## Thanks
 
