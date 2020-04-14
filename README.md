@@ -108,7 +108,7 @@ $ python ./src/main.py --display ssd1322 --width 256 --height 64 --interface spi
 ## Video demo
 
 Click here for a video demo of the display running in a 3D printed case.
-![](TrainDisplay.mov)
+https://youtu.be/rQiCBnV9Zi4
 
 ## Thanks
 
