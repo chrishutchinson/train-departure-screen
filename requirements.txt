@@ -10,7 +10,7 @@ luma.core==1.8.2
 luma.emulator==1.1.0
 luma.oled==3.1.0
 mccabe==0.6.1
-Pillow==5.4.0
+Pillow==8.2.0
 psutil==5.4.8
 pycodestyle==2.5.0
 pygame==1.9.4
