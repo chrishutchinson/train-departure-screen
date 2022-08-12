@@ -1,12 +1,68 @@
 import os
 import requests
 import json
+from datetime import date
 
 def abbrStation(journeyConfig, inputStr):
     dict = journeyConfig['stationAbbr']
     for key in dict.keys():
         inputStr = inputStr.replace(key, dict[key])
     return inputStr
+
+def loadDeparturesForStationRTT(journeyConfig, username, password):
+    if journeyConfig["departureStation"] == "":
+        raise ValueError(
+            "Please set the journey.departureStation property in config.json")
+
+    if username == "" or password == "":
+        raise ValueError(
+            "Please complete the rttApi section of your config.json file")
+
+    departureStation = journeyConfig["departureStation"]
+
+    response = requests.get(f"https://api.rtt.io/api/v1/json/search/{departureStation}", auth=(username, password))
+    data = response.json()
+    translated_departures = []
+    td = date.today()
+
+    for item in data['services'][:5]:
+        uid = item['serviceUid']
+        destination_name = abbrStation(journeyConfig, item['locationDetail']['destination'][0]['description'])
+
+        dt = item['locationDetail']['gbttBookedDeparture']
+        edt = item['locationDetail']['realtimeDeparture']
+
+        aimed_departure_time = dt[:2] + ':' + dt[2:]
+        expected_departure_time = edt[:2] + ':' + edt[2:]
+        status = item['locationDetail']['displayAs']
+        mode = item['serviceType']
+        platform = item['locationDetail']['platform']
+
+        translated_departures.append({'uid': uid, 'destination_name': abbrStation(journeyConfig, destination_name), 'aimed_departure_time': aimed_departure_time, 
+                                        'expected_departure_time': expected_departure_time,
+                                        'status': status, 'mode': mode, 'platform': platform,
+                                        'time_table_url': f"https://api.rtt.io/api/v1/json/service/{uid}/{td.year}/{td.month:02}/{td.day:02}"})
+
+    return translated_departures, departureStation
+
+def loadDestinationsForDepartureRTT(journeyConfig, username, password, timetableUrl):
+    r = requests.get(url=timetableUrl, auth=(username, password))
+    calling_data = r.json()
+
+    index = 0
+    for loc in calling_data['locations']:
+        if loc['crs'] == journeyConfig["departureStation"]:
+            break
+        index += 1
+
+    calling_at = []    
+    for loc in calling_data['locations'][index+1:]:
+        calling_at.append(abbrStation(journeyConfig, loc['description']))
+
+    if len(calling_at) == 1:
+        calling_at[0] = calling_at[0] + ' only.'
+
+    return calling_at
 
 def loadDeparturesForStation(journeyConfig, appId, apiKey):
     if journeyConfig["departureStation"] == "":

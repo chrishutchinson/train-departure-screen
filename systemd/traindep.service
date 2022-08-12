@@ -4,8 +4,8 @@ After=multi-user.target
 
 [Service]
 Type=idle
-WorkingDirectory=/var/local/train-departure-screen
-ExecStart=/usr/bin/python /var/local/train-departure-screen/src/main.py --display ssd1322 --width 256 --height 64 --interface spi --mode 1 --rotate 2
+WorkingDirectory=/var/local/UK-Train-Departure-Display
+ExecStart=/usr/bin/python3 /var/local/UK-Train-Departure-Display/src/main.py --display ssd1322 --width 256 --height 64 --interface spi
 
 [Install]
 WantedBy=multi-user.target

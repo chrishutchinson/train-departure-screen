@@ -1,14 +1,18 @@
 # UK Train Departure Display 
 
-A set of python scripts to display replica near real-time UK railway station departure data on SSD13xx style screens. 
-Uses the publicly available [Transport API](https://www.transportapi.com/).  
+## NOW UPDATED TO USE [Real Time Trains API](https://www.realtimetrains.co.uk/about/developer/) !!
 
-NOW WITH BACKPORTED CHANGES! 
+
+This has been done because Transport API now has draconian usage limitations free is now down to 30 a API calls a day from 1000! 
+
+You can still use the Transport API but you will need a commercial agreement. 
+
+A set of python scripts to display replica near real-time UK railway station departure data on SSD13xx style screens.
+Uses the publicly available [Real Time Trains API](https://www.realtimetrains.co.uk/about/developer/) 
 
    * [Installation](#installation)
    * [Configuration](#configuration)
    * [Running](#running)
-   * [3D-Printed-Case](#3D-Printed-Case)
 
 ![](normal.gif)
 
@@ -39,31 +43,38 @@ $ pip3 install -r requirements.txt
 
 ## Configuration 
 
-Sign up for the [Transport API](https://www.transportapi.com/), and generate an app ID and API key (note the free tier has 1000 request a day).
+Sign up for the [Real Time Trains API](https://api.rtt.io), and get your username and password.
+
+You can still use the old transportAPI (fill in the details and change apiMethod to 'transport') as an alternative but you will either need to have a commercial agreement as the limits on API calls are now so small it is not pratical to use in a real time way. 
 
 Copy `config.sample.json` to `config.json` and complete.
 
 ```javascript
 {
-  "journey": {
-    "departureStation": "",
-    "destinationStation": null,
-    "stationAbbr": {
-      "International": "Intl."
+    "journey": {
+      "departureStation": "",
+      "destinationStation": null,
+      "stationAbbr": {
+        "International": "Intl."
+      }
     },
-    "outOfHoursName": "Hogwarts"
-  },
-  "refreshTime": 180,
-  "transportApi": {
-    "appId": "",
-    "apiKey": "",
-    "operatingHours": "0-23"
+    "refreshTime": 180,
+    "transportApi": {
+      "appId": "",
+      "apiKey": "",
+      "operatingHours": "0-23"
+    },
+    "rttApi":{
+        "username": "",
+        "password": "",
+        "operatingHours": "6-23"
+      },
+      "apiMethod": "rtt"    
   }
-}
 ```
 ### General Settings
 
-`refreshTime` - how frequently it asks for new data from the transport api, there will be two api calls each time this time elapses, be aware the free tier has 1000 calls a day.
+`refreshTime` - how frequently it asks for new data from the chosen api, there will be two api calls each time this time elapses, be aware the free tier of transport api (not used by default) has 30 calls a day.
 
 ### Journey Settings
 
@@ -73,9 +84,15 @@ Copy `config.sample.json` to `config.json` and complete.
 
 `stationAbbr` - a list of words and their abbreviations that can be used to shorten station names, useful for small displays. 
 
-`outOfHoursName` - the station name to display when out of hours. 
+### Real Time Trains API Settings (Default)
 
-### Transport API Settings
+`username` - your real time trains username
+
+`password` - your real time trains password
+
+`operating hours` - the range of hours you wish the display to actively request train times, be aware the free tier API has a limit of 1000 calls a day.
+
+### Transport API Settings (DONT USE)
 
 `appId` - your transport api application ID
 
@@ -83,6 +100,9 @@ Copy `config.sample.json` to `config.json` and complete.
 
 `operating hours` - the range of hours you wish the display to actively request train times, be aware the free tier API has a limit of 1000 calls a day.
 
+### Setting The Live API
+
+`apiMethod` - By default this is set to 'rtt' to use the Real Time Trains API, to chnage to the transport api set this to 'transport' 
 
 ## Running
 
@@ -108,19 +128,10 @@ $ python ./src/main.py --display ssd1322 --width 256 --height 64 --interface spi
 
 ## Video demo
 
-Click here for a video demo of the display running in a 3D printed case.
-https://youtu.be/rQiCBnV9Zi4
-
-## 3D-Printed-Case
-
-I have designed a 3D printed case in OpenSCAD, it should fit a SSD1322 module (specifically this one https://www.aliexpress.com/item/32921021149.html?spm=a2g0s.9042311.0.0.27424c4dnjcngM) and a standard Raspberry Pi Zero W.  The files can be found in the 3d-printed-case folder.
-
-![](train-display-open-scad.png)
+Chris Hutchinson tweeted a video demo of the original software running on a real device: https://twitter.com/chrishutchinson/status/1136743837244768257 I will update this with a video of the modified version at some point in the future.
 
 ## Thanks
 
 A big thanks to Chris Hutchinson who originally built this code! He can be found on GitHub at https://github.com/chrishutchinson/
 
 The fonts used were painstakingly put together by `DanielHartUK` and can be found on GitHub at https://github.com/DanielHartUK/Dot-Matrix-Typeface - A huge thanks for making that resource available!
-
-This has been backported from the Balena version (https://github.com/balenalabs/uk-train-departure-display) that forked from this repo, I wanted to remove the deployment side of it / docker etc.
