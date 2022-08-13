@@ -3,7 +3,7 @@
 ## NOW UPDATED TO USE [Real Time Trains API](https://www.realtimetrains.co.uk/about/developer/) !!
 
 
-This has been done because Transport API now has draconian usage limitations free is now down to 30 a API calls a day from 1000! 
+This has been done because Transport API now has draconian usage limitations, the free tier is now down to 30 API calls a day from 1000! 
 
 You can still use the Transport API but you will need a commercial agreement. 
 
