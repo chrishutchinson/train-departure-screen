@@ -5,3 +5,4 @@ config.json
 .gitignore
 *.DS_Store
 .DS_Store
+src/.DS_Store

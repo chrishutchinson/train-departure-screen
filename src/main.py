@@ -44,7 +44,7 @@ def renderServiceStatus(departure):
     def drawText(draw, width, height):
         train = ""
 
-        if departure["status"] == "CANCELLED":
+        if departure["status"] == "CANCELLED" or departure["status"] == "CANCELLED_CALL" or departure["status"] == "CANCELLED_PASS":
             train = "Cancelled"
         else:
             if isinstance(departure["expected_departure_time"], str):

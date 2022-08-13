@@ -25,6 +25,9 @@ def loadDeparturesForStationRTT(journeyConfig, username, password):
     translated_departures = []
     td = date.today()
 
+    if data['services'] is None:
+        return translated_departures, departureStation
+
     for item in data['services'][:5]:
         uid = item['serviceUid']
         destination_name = abbrStation(journeyConfig, item['locationDetail']['destination'][0]['description'])
