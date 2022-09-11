@@ -33,13 +33,19 @@ def loadDeparturesForStationRTT(journeyConfig, username, password):
         destination_name = abbrStation(journeyConfig, item['locationDetail']['destination'][0]['description'])
 
         dt = item['locationDetail']['gbttBookedDeparture']
-        edt = item['locationDetail']['realtimeDeparture']
+        try:
+            edt = item['locationDetail']['realtimeDeparture']
+        except:
+            edt = item['locationDetail']['gbttBookedDeparture']
 
         aimed_departure_time = dt[:2] + ':' + dt[2:]
         expected_departure_time = edt[:2] + ':' + edt[2:]
         status = item['locationDetail']['displayAs']
         mode = item['serviceType']
-        platform = item['locationDetail']['platform']
+        try:
+            platform = item['locationDetail']['platform']
+        except:
+            platform = ""
 
         translated_departures.append({'uid': uid, 'destination_name': abbrStation(journeyConfig, destination_name), 'aimed_departure_time': aimed_departure_time, 
                                         'expected_departure_time': expected_departure_time,
