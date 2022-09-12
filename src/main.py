@@ -8,16 +8,15 @@ from timeloop import Timeloop
 from datetime import datetime
 from PIL import ImageFont, Image
 from helpers import get_device
-from trains import loadDeparturesForStation, loadDestinationsForDeparture
+from trains import loadDeparturesForStation, loadDestinationsForDeparture, loadDeparturesForStationRTT, loadDestinationsForDepartureRTT
 from luma.core.render import canvas
 from luma.core.virtual import viewport, snapshot
-
+from open import isRun
 
 def loadConfig():
     with open('config.json', 'r') as jsonConfig:
         data = json.load(jsonConfig)
         return data
-
 
 def makeFont(name, size):
     font_path = os.path.abspath(
@@ -30,7 +29,7 @@ def makeFont(name, size):
     return ImageFont.truetype(font_path, size)
 
 
-def renderDestination(departure):
+def renderDestination(departure, font):
     departureTime = departure["aimed_departure_time"]
     destinationName = departure["destination_name"]
 
@@ -43,13 +42,29 @@ def renderDestination(departure):
 
 def renderServiceStatus(departure):
     def drawText(draw, width, height):
-        train = "On time" if departure["aimed_departure_time"] == departure[
-            "expected_departure_time"] else departure["expected_departure_time"]
+        train = ""
 
-        draw.text((0, 0), text=train, font=font, fill="yellow")
+        if departure["status"] == "CANCELLED" or departure["status"] == "CANCELLED_CALL" or departure["status"] == "CANCELLED_PASS":
+            train = "Cancelled"
+        else:
+            if isinstance(departure["expected_departure_time"], str):
+                train = 'Exp '+departure["expected_departure_time"]
 
+            if departure["aimed_departure_time"] == departure["expected_departure_time"]:
+                train = "On time"
+
+        w, h = draw.textsize(train, font)
+        draw.text((width-w,0), text=train, font=font, fill="yellow")
     return drawText
 
+def renderPlatform(departure):
+    def drawText(draw, width, height):
+        if departure["mode"] == "bus":
+            draw.text((0, 0), text="BUS", font=font, fill="yellow")
+        else:
+            if isinstance(departure["platform"], str):
+                draw.text((0, 0), text="Plat "+departure["platform"], font=font, fill="yellow")
+    return drawText
 
 def renderCallingAt(draw, width, height):
     stations = "Calling at:"
@@ -75,27 +90,17 @@ def renderStations(stations):
 
     return drawText
 
-
-def renderServiceDetails(draw, width, height):
-    details = "This train is formed of 10 coaches"
-    draw.text((0, 0), text=details, font=font, fill="yellow")
-
-
-def renderSWR(draw, width, height):
-    swr = "SWR"
-    draw.text((0, 0), text=swr, font=fontBold, fill="yellow")
-
-
 def renderTime(draw, width, height):
     rawTime = datetime.now().time()
     hour, minute, second = str(rawTime).split('.')[0].split(':')
 
     w1, h1 = draw.textsize("{}:{}".format(hour, minute), fontBoldLarge)
+    w2, h2 = draw.textsize(":00", fontBoldTall)
 
-    draw.text(((width - 84) / 2, 0), text="{}:{}".format(hour, minute),
+    draw.text(((width - w1 - w2) / 2, 0), text="{}:{}".format(hour, minute),
               font=fontBoldLarge, fill="yellow")
-    draw.text((((width - 84) / 2) + w1, 3), text=":{}".format(second),
-              font=fontBold, fill="yellow")
+    draw.text((((width - w1 -w2) / 2) + w1, 5), text=":{}".format(second),
+              font=fontBoldTall, fill="yellow")
 
 
 def renderWelcomeTo(xOffset):
@@ -120,6 +125,10 @@ def renderDots(draw, width, height):
 
 
 def loadData(apiConfig, journeyConfig):
+    runHours = [int(x) for x in apiConfig['operatingHours'].split('-')]
+    if isRun(runHours[0], runHours[1]) == False:
+        return False, False, journeyConfig['outOfHoursName']
+
     departures, stationName = loadDeparturesForStation(
         journeyConfig, apiConfig["appId"], apiConfig["apiKey"])
 
@@ -127,10 +136,26 @@ def loadData(apiConfig, journeyConfig):
         return False, False, stationName
 
     firstDepartureDestinations = loadDestinationsForDeparture(
-        departures[0]["service_timetable"]["id"])
+        journeyConfig, departures[0]["service_timetable"]["id"])
 
     return departures, firstDepartureDestinations, stationName
 
+def loadDataRTT(apiConfig, journeyConfig):
+    runHours = [int(x) for x in apiConfig['operatingHours'].split('-')]
+    if isRun(runHours[0], runHours[1]) == False:
+        return False, False, journeyConfig['outOfHoursName']
+
+    departures, stationName = loadDeparturesForStationRTT(
+        journeyConfig, apiConfig["username"], apiConfig["password"])
+
+    if len(departures) == 0:
+        return False, False, journeyConfig['outOfHoursName']
+
+    firstDepartureDestinations = loadDestinationsForDepartureRTT(
+        journeyConfig, apiConfig["username"], apiConfig["password"], departures[0]["time_table_url"])    
+
+    #return False, False, journeyConfig['outOfHoursName']
+    return departures, firstDepartureDestinations, stationName
 
 def drawBlankSignage(device, width, height, departureStation):
     global stationRenderCount, pauseCount
@@ -145,11 +170,11 @@ def drawBlankSignage(device, width, height, departureStation):
 
     virtualViewport = viewport(device, width=width, height=height)
 
-    rowOne = snapshot(width, 16, renderWelcomeTo(
+    rowOne = snapshot(width, 10, renderWelcomeTo(
         (width - welcomeSize[0]) / 2), interval=10)
-    rowTwo = snapshot(width, 16, renderDepartureStation(
+    rowTwo = snapshot(width, 10, renderDepartureStation(
         departureStation, (width - stationSize[0]) / 2), interval=10)
-    rowThree = snapshot(width, 16, renderDots, interval=10)
+    rowThree = snapshot(width, 10, renderDots, interval=10)
     rowTime = snapshot(width, 14, renderTime, interval=1)
 
     if len(virtualViewport._hotspots) > 0:
@@ -157,8 +182,8 @@ def drawBlankSignage(device, width, height, departureStation):
             virtualViewport.remove_hotspot(hotspot, xy)
 
     virtualViewport.add_hotspot(rowOne, (0, 0))
-    virtualViewport.add_hotspot(rowTwo, (0, 16))
-    virtualViewport.add_hotspot(rowThree, (0, 32))
+    virtualViewport.add_hotspot(rowTwo, (0, 12))
+    virtualViewport.add_hotspot(rowThree, (0, 24))
     virtualViewport.add_hotspot(rowTime, (0, 50))
 
     return virtualViewport
@@ -171,7 +196,7 @@ def drawSignage(device, width, height, data):
 
     virtualViewport = viewport(device, width=width, height=height)
 
-    status = "On time"
+    status = "Exp 00:00"
     callingAt = "Calling at:"
 
     departures, firstDepartureDestinations, departureStation = data
@@ -185,19 +210,29 @@ def drawSignage(device, width, height, data):
     # First measure the text size
     with canvas(device) as draw:
         w, h = draw.textsize(status, font)
+        pw, ph = draw.textsize("Plat 88", font)
 
     rowOneA = snapshot(
-        width - w, 16, renderDestination(departures[0]), interval=10)
-    rowOneB = snapshot(w, 16, renderServiceStatus(
-        departures[0]), interval=10)
-    rowTwoA = snapshot(callingWidth, 16, renderCallingAt, interval=100)
-    rowTwoB = snapshot(width - callingWidth, 16,
+        width - w - pw, 10, renderDestination(departures[0], fontBold), interval=10)
+    rowOneB = snapshot(w, 10, renderServiceStatus(
+        departures[0]), interval=1)
+    rowOneC = snapshot(pw, 10, renderPlatform(departures[0]), interval=10)
+    rowTwoA = snapshot(callingWidth, 10, renderCallingAt, interval=100)
+    rowTwoB = snapshot(width - callingWidth, 10,
                        renderStations(", ".join(firstDepartureDestinations)), interval=0.1)
     if(len(departures) > 1):
-        rowThreeA = snapshot(width - w, 16, renderDestination(
-            departures[1]), interval=10)
-        rowThreeB = snapshot(w, 16, renderServiceStatus(
-            departures[1]), interval=10)
+        rowThreeA = snapshot(width - w - pw, 10, renderDestination(
+            departures[1],font), interval=10)
+        rowThreeB = snapshot(w, 10, renderServiceStatus(
+            departures[1]), interval=1)
+        rowThreeC = snapshot(pw, 10, renderPlatform(departures[1]), interval=10)
+
+    if(len(departures) > 2):
+        rowFourA = snapshot(width - w - pw, 10, renderDestination(
+            departures[2],font), interval=10)
+        rowFourB = snapshot(w, 10, renderServiceStatus(
+            departures[2]), interval=1)
+        rowFourC = snapshot(pw, 10, renderPlatform(departures[2]), interval=10)
 
     rowTime = snapshot(width, 14, renderTime, interval=1)
 
@@ -210,12 +245,17 @@ def drawSignage(device, width, height, data):
 
     virtualViewport.add_hotspot(rowOneA, (0, 0))
     virtualViewport.add_hotspot(rowOneB, (width - w, 0))
-    virtualViewport.add_hotspot(rowTwoA, (0, 16))
-    virtualViewport.add_hotspot(rowTwoB, (callingWidth, 16))
+    virtualViewport.add_hotspot(rowOneC, (width - w - pw, 0))
+    virtualViewport.add_hotspot(rowTwoA, (0, 12))
+    virtualViewport.add_hotspot(rowTwoB, (callingWidth, 12))
     if(len(departures) > 1):
-        virtualViewport.add_hotspot(rowThreeA, (0, 32))
-        virtualViewport.add_hotspot(rowThreeB, (width - w, 32))
-
+        virtualViewport.add_hotspot(rowThreeA, (0, 24))
+        virtualViewport.add_hotspot(rowThreeB, (width - w, 24))
+        virtualViewport.add_hotspot(rowThreeC, (width - w - pw, 24))
+    if(len(departures) > 2):
+        virtualViewport.add_hotspot(rowFourA, (0, 36))
+        virtualViewport.add_hotspot(rowFourB, (width - w, 36))
+        virtualViewport.add_hotspot(rowFourC, (width - w - pw, 36))
     virtualViewport.add_hotspot(rowTime, (0, 50))
 
     return virtualViewport
@@ -225,8 +265,9 @@ try:
     config = loadConfig()
 
     device = get_device()
-    font = makeFont("Dot Matrix Regular.ttf", 16)
-    fontBold = makeFont("Dot Matrix Bold.ttf", 16)
+    font = makeFont("Dot Matrix Regular.ttf", 10)
+    fontBold = makeFont("Dot Matrix Bold.ttf", 10)
+    fontBoldTall = makeFont("Dot Matrix Bold Tall.ttf", 10)
     fontBoldLarge = makeFont("Dot Matrix Bold.ttf", 20)
 
     widgetWidth = 256
@@ -236,7 +277,11 @@ try:
     pauseCount = 0
     loop_count = 0
 
-    data = loadData(config["transportApi"], config["journey"])
+    if config["apiMethod"] == 'rtt':
+        data = loadDataRTT(config["rttApi"], config["journey"])
+    else:
+        data = loadData(config["transportApi"], config["journey"])      
+
     if data[0] == False:
         virtual = drawBlankSignage(
             device, width=widgetWidth, height=widgetHeight, departureStation=data[2])
@@ -249,7 +294,11 @@ try:
 
     while True:
         if(timeNow - timeAtStart >= config["refreshTime"]):
-            data = loadData(config["transportApi"], config["journey"])
+            if config["apiMethod"] == 'rtt':
+                data = loadDataRTT(config["rttApi"], config["journey"])
+            else:
+                data = loadData(config["transportApi"], config["journey"])      
+                
             if data[0] == False:
                 virtual = drawBlankSignage(
                     device, width=widgetWidth, height=widgetHeight, departureStation=data[2])
@@ -261,7 +310,6 @@ try:
 
         timeNow = time.time()
         virtual.refresh()
-
 
 except KeyboardInterrupt:
     pass
