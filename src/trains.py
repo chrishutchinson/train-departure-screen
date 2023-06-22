@@ -1,40 +1,60 @@
 import os
 import requests
+import base64
 
+def toBase64(value):
+    value_bytes = value.encode('ascii')
+    base64_bytes = base64.b64encode(value_bytes)
+    return base64_bytes.decode('ascii')
 
-def loadDeparturesForStation(journeyConfig, appId, apiKey):
+def makeAuthorizedRequest(url, apiConfig):
+    username = apiConfig["username"]
+    password = apiConfig["password"]
+
+    if username == "" or password == "":
+        raise ValueError(
+            "Please complete the realtimeTrainsApi section of your config.json file")
+    
+    authorizationHeader = f"{username}:{password}"
+    HEADERS = {"Authorization": f"Basic {toBase64(authorizationHeader)}"}
+
+    r = requests.get(url=url, headers=HEADERS)
+
+    data = r.json()
+    
+    if "error" in data:
+        raise ValueError(data["error"])
+
+    return data
+
+def loadDeparturesForStation(journeyConfig, apiConfig):
     if journeyConfig["departureStation"] == "":
         raise ValueError(
             "Please set the journey.departureStation property in config.json")
 
-    if appId == "" or apiKey == "":
-        raise ValueError(
-            "Please complete the transportApi section of your config.json file")
-
     departureStation = journeyConfig["departureStation"]
+    destinationStation = journeyConfig["destinationStation"]
 
-    URL = f"http://transportapi.com/v3/uk/train/station/{departureStation}/live.json"
+    if destinationStation == "":
+        URL = f"https://api.rtt.io/api/v1/json/search/{departureStation}"
+    else:
+        URL = f"https://api.rtt.io/api/v1/json/search/{departureStation}/to/{destinationStation}"
 
-    PARAMS = {'app_id': appId,
-              'app_key': apiKey,
-              'calling_at': journeyConfig["destinationStation"]}
-
-    r = requests.get(url=URL, params=PARAMS)
-
-    data = r.json()
+    data = makeAuthorizedRequest(URL, apiConfig)
 
     if "error" in data:
         raise ValueError(data["error"])
 
-    return data["departures"]["all"], data["station_name"]
+    return data["services"], data["location"]["name"]
 
 
-def loadDestinationsForDeparture(timetableUrl):
-    r = requests.get(url=timetableUrl)
+def loadDestinationsForDeparture(serviceUid, runDate, apiConfig):
+    year, month, day = runDate.split("-")
+    URL = f"https://api.rtt.io/api/v1/json/service/{serviceUid}/{year}/{month}/{day}"
 
-    data = r.json()
+    data = makeAuthorizedRequest(URL, apiConfig)
 
     if "error" in data:
         raise ValueError(data["error"])
 
-    return list(map(lambda x: x["station_name"], data["stops"]))[1:]
+    return list(map(lambda x: x["description"], data["locations"]))[1:]

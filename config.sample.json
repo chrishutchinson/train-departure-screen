@@ -4,8 +4,8 @@
     "destinationStation": null
   },
   "refreshTime": 120,
-  "transportApi": {
-    "appId": "",
-    "apiKey": ""
+  "realtimeTrainsApi": {
+    "username": "",
+    "password": ""
   }
 }

@@ -31,8 +31,8 @@ def makeFont(name, size):
 
 
 def renderDestination(departure):
-    departureTime = departure["aimed_departure_time"]
-    destinationName = departure["destination_name"]
+    departureTime = departure["locationDetail"]["gbttBookedDeparture"]
+    destinationName = departure["locationDetail"]["description"]
 
     def drawText(draw, width, height):
         train = f"{departureTime}  {destinationName}"
@@ -43,8 +43,8 @@ def renderDestination(departure):
 
 def renderServiceStatus(departure):
     def drawText(draw, width, height):
-        train = "On time" if departure["aimed_departure_time"] == departure[
-            "expected_departure_time"] else departure["expected_departure_time"]
+        train = "On time" if departure["locationDetail"]["gbttBookedDeparture"] == departure["locationDetail"][
+            "realtimeDeparture"] else departure["locationDetail"]["realtimeDeparture"]
 
         draw.text((0, 0), text=train, font=font, fill="yellow")
 
@@ -121,13 +121,13 @@ def renderDots(draw, width, height):
 
 def loadData(apiConfig, journeyConfig):
     departures, stationName = loadDeparturesForStation(
-        journeyConfig, apiConfig["appId"], apiConfig["apiKey"])
+        journeyConfig, apiConfig)
 
     if len(departures) == 0:
         return False, False, stationName
 
     firstDepartureDestinations = loadDestinationsForDeparture(
-        departures[0]["service_timetable"]["id"])
+        departures[0]["serviceUid"], departures[0]["runDate"], apiConfig)
 
     return departures, firstDepartureDestinations, stationName
 
@@ -236,7 +236,7 @@ try:
     pauseCount = 0
     loop_count = 0
 
-    data = loadData(config["transportApi"], config["journey"])
+    data = loadData(config["realtimeTrainsApi"], config["journey"])
     if data[0] == False:
         virtual = drawBlankSignage(
             device, width=widgetWidth, height=widgetHeight, departureStation=data[2])
@@ -249,7 +249,7 @@ try:
 
     while True:
         if(timeNow - timeAtStart >= config["refreshTime"]):
-            data = loadData(config["transportApi"], config["journey"])
+            data = loadData(config["realtimeTrainsApi"], config["journey"])
             if data[0] == False:
                 virtual = drawBlankSignage(
                     device, width=widgetWidth, height=widgetHeight, departureStation=data[2])
