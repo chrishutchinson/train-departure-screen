@@ -5,7 +5,7 @@
   },
   "refreshTime": 120,
   "realtimeTrainsApi": {
-    "appId": "",
-    "apiKey": ""
+    "username": "",
+    "password": ""
   }
 }
