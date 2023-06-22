@@ -32,9 +32,9 @@ $ sudo apt-get install libopenjp2-7
 $ pip install -r requirements.txt
 ```
 
-3. Sign up for the [Transport API](https://www.transportapi.com/), and generate an app ID and API key
+3. Sign up for the [Realtime Trains API](https://www.realtimetrains.co.uk/), and generate a username and password
 
-4. Copy `config.sample.json` to `config.json` and complete the values, including your Transport API keys from step 3. _Note: station names should be provided as their three-letter station code, all available [here](https://www.nationalrail.co.uk/stations_destinations/48541.aspx)._
+4. Copy `config.sample.json` to `config.json` and complete the values, including your Realtime Trains API keys from step 3. _Note: station names should be provided as their three-letter station code, all available [here](https://www.nationalrail.co.uk/stations_destinations/48541.aspx)._
 
 5. Start the app with:
 

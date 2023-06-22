@@ -1,3 +1,6 @@
 venv
 __pycache__
 config.json
+
+# macOS
+.DS_Store
