@@ -15,6 +15,7 @@ logging.basicConfig(
 )
 # ignore PIL debug messages
 logging.getLogger('PIL').setLevel(logging.ERROR)
+logging.getLogger('nredarwin').setLevel(logging.ERROR)
 
 
 def display_settings(args):

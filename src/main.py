@@ -31,8 +31,8 @@ def makeFont(name, size):
 
 
 def renderDestination(departure):
-    departureTime = departure["aimed_departure_time"]
-    destinationName = departure["destination_name"]
+    departureTime = "00:00"
+    destinationName = departure.destination_text
 
     def drawText(draw, width, height):
         train = f"{departureTime}  {destinationName}"
@@ -43,8 +43,8 @@ def renderDestination(departure):
 
 def renderServiceStatus(departure):
     def drawText(draw, width, height):
-        train = "On time" if departure["aimed_departure_time"] == departure[
-            "expected_departure_time"] else departure["expected_departure_time"]
+        # train = "On time" if departure["aimed_departure_time"] == departure["expected_departure_time"] else departure["expected_departure_time"]
+        train = departure.atd
 
         draw.text((0, 0), text=train, font=font, fill="yellow")
 

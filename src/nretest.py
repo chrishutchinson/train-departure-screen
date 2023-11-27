@@ -80,6 +80,8 @@ for service in board.train_services:
     service = darwin_sesh.get_service_details(service.service_id)
     # print(service.std, service.etd, service.destination.location_name)
     # print(service.subsequent_calling_points)
-    print("\n\n ---- \n\n")
-    for point in service.subsequent_calling_points:
-        print(point.location_name, point.et, point.at, point.st)
+    # print("\n\n ---- \n\n")
+    # for point in service.subsequent_calling_points:
+    #     print(point.location_name, point.et, point.at, point.st)
+
+    print(service)
