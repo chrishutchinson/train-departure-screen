@@ -48,9 +48,9 @@ def renderServiceStatus(departure):
     def drawText(draw, width, height):
         # train = "On time" if departure["aimed_departure_time"] == departure["expected_departure_time"] else departure["expected_departure_time"]
         # train = departure.atd
-        train = darwin_sesh.get_service_details(departure.service_id).atd
+        # train = darwin_sesh.get_service_details(departure.service_id).atd
 
-        draw.text((0, 0), text=train, font=font, fill="yellow")
+        draw.text((0, 0), text="train", font=font, fill="yellow")
 
     return drawText
 
