@@ -13,7 +13,7 @@ from luma.core.render import canvas
 from luma.core.virtual import viewport, snapshot
 
 from nredarwin.webservice import DarwinLdbSession
-darwin_sesh = DarwinLdbSession(wsdl="https://lite.realtime.nationalrail.co.uk/OpenLDBWS/wsdl.aspx", api_key=apiKey)
+darwin_sesh = None  # APi key is set later
 
 
 def loadConfig():
@@ -234,6 +234,8 @@ try:
     stationRenderCount = 0
     pauseCount = 0
     loop_count = 0
+
+    darwin_sesh = DarwinLdbSession(wsdl="https://lite.realtime.nationalrail.co.uk/OpenLDBWS/wsdl.aspx", api_key=config["nreAPI"]["apiKey"])
 
     data = loadData(config["nreAPI"], config["journey"])
     if data[0] == False:
