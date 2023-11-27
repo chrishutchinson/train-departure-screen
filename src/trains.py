@@ -42,7 +42,7 @@ def loadDestinationsForDeparture(trainService, apiKey):
 
     darwin_sesh = DarwinLdbSession(wsdl="https://lite.realtime.nationalrail.co.uk/OpenLDBWS/wsdl.aspx", api_key=apiKey)
 
-    service = darwin_sesh.get_service_details(service.service_id)
+    service = darwin_sesh.get_service_details(trainService.service_id)
 
     for point in service.subsequent_calling_points:
         # print(point.location_name, point.et, point.at, point.st)
