@@ -2,14 +2,14 @@ import os
 import requests
 
 
-def loadDeparturesForStation(journeyConfig, appId, apiKey):
+def loadDeparturesForStation(journeyConfig, apiKey):
     if journeyConfig["departureStation"] == "":
         raise ValueError(
             "Please set the journey.departureStation property in config.json")
 
-    if appId == "" or apiKey == "":
+    if apiKey == "":
         raise ValueError(
-            "Please complete the transportApi section of your config.json file")
+            "Please complete the nreAPI section of your config.json file")
 
     departureStation = journeyConfig["departureStation"]
 

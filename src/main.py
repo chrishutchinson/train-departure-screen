@@ -121,7 +121,7 @@ def renderDots(draw, width, height):
 
 def loadData(apiConfig, journeyConfig):
     departures, stationName = loadDeparturesForStation(
-        journeyConfig, apiConfig["appId"], apiConfig["apiKey"])
+        journeyConfig, apiConfig["apiKey"])
 
     if len(departures) == 0:
         return False, False, stationName
@@ -236,7 +236,7 @@ try:
     pauseCount = 0
     loop_count = 0
 
-    data = loadData(config["transportApi"], config["journey"])
+    data = loadData(config["nreAPI"], config["journey"])
     if data[0] == False:
         virtual = drawBlankSignage(
             device, width=widgetWidth, height=widgetHeight, departureStation=data[2])
