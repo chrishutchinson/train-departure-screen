@@ -127,7 +127,7 @@ def loadData(apiConfig, journeyConfig):
         return False, False, stationName
 
     firstDepartureDestinations = loadDestinationsForDeparture(
-        departures[0]["service_timetable"]["id"])
+        departures[0])
 
     return departures, firstDepartureDestinations, stationName
 
@@ -186,18 +186,13 @@ def drawSignage(device, width, height, data):
     with canvas(device) as draw:
         w, h = draw.textsize(status, font)
 
-    rowOneA = snapshot(
-        width - w, 16, renderDestination(departures[0]), interval=10)
-    rowOneB = snapshot(w, 16, renderServiceStatus(
-        departures[0]), interval=10)
+    rowOneA = snapshot(width - w, 16, renderDestination(departures[0]), interval=10)
+    rowOneB = snapshot(w, 16, renderServiceStatus(departures[0]), interval=10)
     rowTwoA = snapshot(callingWidth, 16, renderCallingAt, interval=100)
-    rowTwoB = snapshot(width - callingWidth, 16,
-                       renderStations(", ".join(firstDepartureDestinations)), interval=0.1)
+    rowTwoB = snapshot(width - callingWidth, 16, renderStations(", ".join(firstDepartureDestinations)), interval=0.1)
     if(len(departures) > 1):
-        rowThreeA = snapshot(width - w, 16, renderDestination(
-            departures[1]), interval=10)
-        rowThreeB = snapshot(w, 16, renderServiceStatus(
-            departures[1]), interval=10)
+        rowThreeA = snapshot(width - w, 16, renderDestination(departures[1]), interval=10)
+        rowThreeB = snapshot(w, 16, renderServiceStatus(departures[1]), interval=10)
 
     rowTime = snapshot(width, 14, renderTime, interval=1)
 
@@ -249,7 +244,7 @@ try:
 
     while True:
         if(timeNow - timeAtStart >= config["refreshTime"]):
-            data = loadData(config["transportApi"], config["journey"])
+            data = loadData(config["nreAPI"], config["journey"])
             if data[0] == False:
                 virtual = drawBlankSignage(
                     device, width=widgetWidth, height=widgetHeight, departureStation=data[2])

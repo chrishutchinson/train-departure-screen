@@ -1,5 +1,6 @@
 import os
 import requests
+from nredarwin.webservice import DarwinLdbSession
 
 
 def loadDeparturesForStation(journeyConfig, apiKey):
@@ -13,28 +14,34 @@ def loadDeparturesForStation(journeyConfig, apiKey):
 
     departureStation = journeyConfig["departureStation"]
 
-    URL = f"http://transportapi.com/v3/uk/train/station/{departureStation}/live.json"
+    # URL = f"http://transportapi.com/v3/uk/train/station/{departureStation}/live.json"
 
-    PARAMS = {'app_id': appId,
-              'app_key': apiKey,
-              'calling_at': journeyConfig["destinationStation"]}
+    # PARAMS = {'app_id': appId,
+    #           'app_key': apiKey,
+    #           'calling_at': journeyConfig["destinationStation"]}
 
-    r = requests.get(url=URL, params=PARAMS)
+    # r = requests.get(url=URL, params=PARAMS)
 
-    data = r.json()
+    # data = r.json()
 
-    if "error" in data:
-        raise ValueError(data["error"])
+    # if "error" in data:
+    #     raise ValueError(data["error"])
 
-    return data["departures"]["all"], data["station_name"]
+    darwin_sesh = DarwinLdbSession(wsdl="https://lite.realtime.nationalrail.co.uk/OpenLDBWS/wsdl.aspx", api_key=apiKey)
+
+    board = darwin_sesh.get_station_board(departureStation)
+
+    # for service in board.train_services:
+    #     print(service.std, service.etd, service.destination.location_name)
+
+    return board.train_services, board.location_name
 
 
 def loadDestinationsForDeparture(timetableUrl):
-    r = requests.get(url=timetableUrl)
+    nextStops = []
 
-    data = r.json()
+    for point in service.subsequent_calling_points:
+        # print(point.location_name, point.et, point.at, point.st)
+        nextStops.append(point.location_name)
 
-    if "error" in data:
-        raise ValueError(data["error"])
-
-    return list(map(lambda x: x["station_name"], data["stops"]))[1:]
+    return nextStops
