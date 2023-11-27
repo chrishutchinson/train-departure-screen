@@ -35,6 +35,7 @@ def makeFont(name, size):
 
 def renderDestination(departure):
     departureTime = "00:00" # TODO: Fix this
+    print("------ ", darwin_sesh.get_service_details(departure.service_id).atd)
     destinationName = departure.destination_text
 
     def drawText(draw, width, height):
@@ -45,12 +46,12 @@ def renderDestination(departure):
 
 
 def renderServiceStatus(departure):
+    status = darwin_sesh.get_service_details(departure.service_id).atd
     def drawText(draw, width, height):
         # train = "On time" if departure["aimed_departure_time"] == departure["expected_departure_time"] else departure["expected_departure_time"]
         # train = departure.atd
-        # train = darwin_sesh.get_service_details(departure.service_id).atd
-
-        draw.text((0, 0), text="train", font=font, fill="yellow")
+        train = f"On time" if status == None else status
+        draw.text((0, 0), text=train, font=font, fill="yellow")
 
     return drawText
 
