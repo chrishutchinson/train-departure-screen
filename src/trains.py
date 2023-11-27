@@ -37,7 +37,7 @@ def loadDeparturesForStation(journeyConfig, apiKey):
     return board.train_services, board.location_name
 
 
-def loadDestinationsForDeparture(timetableUrl):
+def loadDestinationsForDeparture(service):
     nextStops = []
 
     for point in service.subsequent_calling_points:
