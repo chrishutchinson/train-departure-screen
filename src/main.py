@@ -127,7 +127,7 @@ def loadData(apiConfig, journeyConfig):
         return False, False, stationName
 
     firstDepartureDestinations = loadDestinationsForDeparture(
-        departures[0])
+        departures[0], apiConfig["apiKey"])
 
     return departures, firstDepartureDestinations, stationName
 
