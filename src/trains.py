@@ -66,6 +66,6 @@ def loadDestinationsForDeparture(trainService):
 
     for point in trainService["subsequentCallingPoints"]["callingPointList"]:
         # print(point.location_name, point.et, point.at, point.st)
-        nextStops.append(point["callingPoint"]["locationName"])
+        nextStops.append(point["callingPoint"][0]["locationName"])
 
     return nextStops
