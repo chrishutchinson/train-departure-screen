@@ -12,8 +12,6 @@ from trains import loadDeparturesForStation, loadDestinationsForDeparture
 from luma.core.render import canvas
 from luma.core.virtual import viewport, snapshot
 
-from nredarwin.webservice import DarwinLdbSession
-darwin_sesh = None  # APi key is set later
 
 
 def loadConfig():
@@ -34,9 +32,9 @@ def makeFont(name, size):
 
 
 def renderDestination(departure):
-    departureTime = "00:00" # TODO: Fix this
-    print("------ ", darwin_sesh.get_service_details(departure.service_id).atd)
-    destinationName = departure.destination_text
+    departureTime = departure["std"]
+    # print("------ ", darwin_sesh.get_service_details(departure.service_id).ata)
+    destinationName = departure["destination"]["location"]["locationName"]
 
     def drawText(draw, width, height):
         train = f"{departureTime}  {destinationName}"
@@ -46,7 +44,7 @@ def renderDestination(departure):
 
 
 def renderServiceStatus(departure):
-    status = darwin_sesh.get_service_details(departure.service_id).atd
+    status = departure["etd"]
     def drawText(draw, width, height):
         # train = "On time" if departure["aimed_departure_time"] == departure["expected_departure_time"] else departure["expected_departure_time"]
         # train = departure.atd
@@ -132,7 +130,7 @@ def loadData(apiConfig, journeyConfig):
         return False, False, stationName
 
     firstDepartureDestinations = loadDestinationsForDeparture(
-        departures[0], apiConfig["apiKey"])
+        departures[0])
 
     return departures, firstDepartureDestinations, stationName
 
@@ -236,7 +234,6 @@ try:
     pauseCount = 0
     loop_count = 0
 
-    darwin_sesh = DarwinLdbSession(wsdl="https://lite.realtime.nationalrail.co.uk/OpenLDBWS/wsdl.aspx", api_key=config["nreAPI"]["apiKey"])
 
     data = loadData(config["nreAPI"], config["journey"])
     if data[0] == False:

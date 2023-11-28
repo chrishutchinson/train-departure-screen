@@ -73,15 +73,16 @@ from pprint import pprint
 
 darwin_sesh = DarwinLdbSession(wsdl="https://lite.realtime.nationalrail.co.uk/OpenLDBWS/wsdl.aspx", api_key="abeedf25-c7ae-4b10-bc2e-0c3b0b1c38df")
 
-board = darwin_sesh.get_station_board('STP')
+board = darwin_sesh.get_station_board('HMT')
 
 for service in board.train_services:
     # print(service)
     service = darwin_sesh.get_service_details(service.service_id)
-    print(service.std, service.etd, service.destination.location_name)
+    # print(service.std, service.etd, service.destination.location_name)
+    # print(service.atd)
     # print(service.subsequent_calling_points)
-    # print("\n\n ---- \n\n")
-    # for point in service.subsequent_calling_points:
+    print("\n\n ---- \n\n")
+    # for point in service.previous_calling_points:
     #     print(point.location_name, point.et, point.at, point.st)
 
-    # print(service)
+    print(service)
