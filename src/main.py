@@ -13,6 +13,7 @@ from luma.core.render import canvas
 from luma.core.virtual import viewport, snapshot
 
 
+
 def loadConfig():
     with open('config.json', 'r') as jsonConfig:
         data = json.load(jsonConfig)
@@ -31,8 +32,9 @@ def makeFont(name, size):
 
 
 def renderDestination(departure):
-    departureTime = departure["aimed_departure_time"]
-    destinationName = departure["destination_name"]
+    departureTime = departure["std"]
+    # print("------ ", darwin_sesh.get_service_details(departure.service_id).ata)
+    destinationName = departure["destination"]["location"][0]["locationName"]
 
     def drawText(draw, width, height):
         train = f"{departureTime}  {destinationName}"
@@ -42,10 +44,11 @@ def renderDestination(departure):
 
 
 def renderServiceStatus(departure):
+    status = departure["etd"]
     def drawText(draw, width, height):
-        train = "On time" if departure["aimed_departure_time"] == departure[
-            "expected_departure_time"] else departure["expected_departure_time"]
-
+        # train = "On time" if departure["aimed_departure_time"] == departure["expected_departure_time"] else departure["expected_departure_time"]
+        # train = departure.atd
+        train = f"On time" if status == None else status
         draw.text((0, 0), text=train, font=font, fill="yellow")
 
     return drawText
@@ -121,13 +124,13 @@ def renderDots(draw, width, height):
 
 def loadData(apiConfig, journeyConfig):
     departures, stationName = loadDeparturesForStation(
-        journeyConfig, apiConfig["appId"], apiConfig["apiKey"])
+        journeyConfig, apiConfig["apiKey"])
 
     if len(departures) == 0:
         return False, False, stationName
 
     firstDepartureDestinations = loadDestinationsForDeparture(
-        departures[0]["service_timetable"]["id"])
+        departures[0])
 
     return departures, firstDepartureDestinations, stationName
 
@@ -186,18 +189,13 @@ def drawSignage(device, width, height, data):
     with canvas(device) as draw:
         w, h = draw.textsize(status, font)
 
-    rowOneA = snapshot(
-        width - w, 16, renderDestination(departures[0]), interval=10)
-    rowOneB = snapshot(w, 16, renderServiceStatus(
-        departures[0]), interval=10)
+    rowOneA = snapshot(width - w, 16, renderDestination(departures[0]), interval=10)
+    rowOneB = snapshot(w, 16, renderServiceStatus(departures[0]), interval=10)
     rowTwoA = snapshot(callingWidth, 16, renderCallingAt, interval=100)
-    rowTwoB = snapshot(width - callingWidth, 16,
-                       renderStations(", ".join(firstDepartureDestinations)), interval=0.1)
+    rowTwoB = snapshot(width - callingWidth, 16, renderStations(", ".join(firstDepartureDestinations)), interval=0.1)
     if(len(departures) > 1):
-        rowThreeA = snapshot(width - w, 16, renderDestination(
-            departures[1]), interval=10)
-        rowThreeB = snapshot(w, 16, renderServiceStatus(
-            departures[1]), interval=10)
+        rowThreeA = snapshot(width - w, 16, renderDestination(departures[1]), interval=10)
+        rowThreeB = snapshot(w, 16, renderServiceStatus(departures[1]), interval=10)
 
     rowTime = snapshot(width, 14, renderTime, interval=1)
 
@@ -236,7 +234,8 @@ try:
     pauseCount = 0
     loop_count = 0
 
-    data = loadData(config["transportApi"], config["journey"])
+
+    data = loadData(config["nreAPI"], config["journey"])
     if data[0] == False:
         virtual = drawBlankSignage(
             device, width=widgetWidth, height=widgetHeight, departureStation=data[2])
@@ -249,7 +248,7 @@ try:
 
     while True:
         if(timeNow - timeAtStart >= config["refreshTime"]):
-            data = loadData(config["transportApi"], config["journey"])
+            data = loadData(config["nreAPI"], config["journey"])
             if data[0] == False:
                 virtual = drawBlankSignage(
                     device, width=widgetWidth, height=widgetHeight, departureStation=data[2])
