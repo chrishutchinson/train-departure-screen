@@ -34,7 +34,7 @@ def makeFont(name, size):
 def renderDestination(departure):
     departureTime = departure["std"]
     # print("------ ", darwin_sesh.get_service_details(departure.service_id).ata)
-    destinationName = departure["destination"]["location"]["locationName"]
+    destinationName = departure["destination"]["location"][0]["locationName"]
 
     def drawText(draw, width, height):
         train = f"{departureTime}  {destinationName}"

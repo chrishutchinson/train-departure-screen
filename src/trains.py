@@ -64,8 +64,8 @@ def loadDeparturesForStation(journeyConfig, apiKey):
 def loadDestinationsForDeparture(trainService):
     nextStops = []
 
-    for point in trainService["subsequentCallingPoints"]["callingPointList"]:
+    for point in trainService["subsequentCallingPoints"]["callingPointList"][0]["callingPoint"]:
         # print(point.location_name, point.et, point.at, point.st)
-        nextStops.append(point["callingPoint"][0]["locationName"])
+        nextStops.append(point["locationName"])
 
     return nextStops
