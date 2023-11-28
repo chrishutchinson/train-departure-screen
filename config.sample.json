@@ -1,11 +1,9 @@
 {
   "journey": {
-    "departureStation": "",
-    "destinationStation": null
+      "departureStation": ""
   },
   "refreshTime": 120,
-  "transportApi": {
-    "appId": "",
-    "apiKey": ""
+  "nreAPI": {
+      "apiKey": ""
   }
 }
